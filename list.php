@@ -95,6 +95,10 @@ try {
                 View Students
             </a>
 
+            <a href="options.php">
+                Options
+            </a>
+
         </nav>
 
     </header>

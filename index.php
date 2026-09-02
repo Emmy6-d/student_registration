@@ -14,6 +14,7 @@
             <a href="index.php" class="active">Home</a>
             <a href="register.php">Register Student</a>
             <a href="list.php">View Students</a>
+            <a href="options.php">Options</a>
         </nav>
     </header>
 

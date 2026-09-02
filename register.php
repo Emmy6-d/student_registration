@@ -69,6 +69,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <a href="index.php">Home</a>
             <a href="register.php" class="active">Register Student</a>
             <a href="list.php">View Students</a>
+            <a href="options.php">Options</a>
         </nav>
     </header>
     <main class="card form-card">
