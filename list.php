@@ -79,7 +79,10 @@ try {
 
     <header class="header">
 
-        <h1>Bluebridge Student Hub</h1>
+        <div class="brand-wrap">
+            <div class="brand-mark">B</div>
+            <h1>Bluebridge Student Hub</h1>
+        </div>
 
         <nav>
 

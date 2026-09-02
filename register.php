@@ -64,7 +64,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <body>
 <div class="container">
     <header class="header">
-        <h1>Bluebridge Student Hub</h1>
+        <div class="brand-wrap">
+            <div class="brand-mark">B</div>
+            <h1>Bluebridge Student Hub</h1>
+        </div>
         <nav>
             <a href="index.php">Home</a>
             <a href="register.php" class="active">Register Student</a>
