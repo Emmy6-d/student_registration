@@ -1,5 +1,6 @@
 <?php
 
+session_start();
 require_once "config.php";
 
 $id = filter_input(INPUT_GET, "id", FILTER_VALIDATE_INT);
@@ -7,6 +8,7 @@ $message = "";
 $messageType = "";
 $classOptions = ["Senior 1", "Senior 2", "Senior 3", "Senior 4", "Senior 5", "Senior 6"];
 $genderOptions = ["Male", "Female"];
+$isVerified = $_SESSION["edit_authorized_{$id}"] ?? false;
 
 if (!$id) {
     header("Location: list.php");
@@ -14,7 +16,7 @@ if (!$id) {
 }
 
 try {
-    $stmt = $pdo->prepare("SELECT id, name, age, gender, class, contact, email FROM students WHERE id = :id");
+    $stmt = $pdo->prepare("SELECT id, name, age, gender, class, contact, email, password_hash FROM students WHERE id = :id");
     $stmt->execute([":id" => $id]);
     $student = $stmt->fetch();
 
@@ -36,54 +38,74 @@ $contact = $student["contact"] ?? "";
 $email = $student["email"] ?? "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && $student) {
-    $name = trim($_POST["name"] ?? "");
-    $age = trim($_POST["age"] ?? "");
-    $gender = trim($_POST["gender"] ?? "");
-    $class = trim($_POST["class"] ?? "");
-    $contact = trim($_POST["contact"] ?? "");
-    $email = trim($_POST["email"] ?? "");
+    if (($_POST["action"] ?? "") === "verify") {
+        $verificationName = trim($_POST["verification_name"] ?? "");
+        $verificationContact = trim($_POST["verification_contact"] ?? "");
+        $verificationPassword = $_POST["verification_password"] ?? "";
 
-    if ($name === "" || $age === "" || $gender === "" || $class === "" || $contact === "" || $email === "") {
+        if (
+            hash_equals((string)$student["name"], $verificationName)
+            && hash_equals((string)($student["contact"] ?? ""), $verificationContact)
+            && !empty($student["password_hash"])
+            && password_verify($verificationPassword, $student["password_hash"])
+        ) {
+            $_SESSION["edit_authorized_{$id}"] = true;
+            $isVerified = true;
+        } else {
+            $message = "The name, contact, or password does not match our records.";
+            $messageType = "error";
+        }
+    } elseif (($_POST["action"] ?? "") === "update" && $isVerified) {
+        $name = trim($_POST["name"] ?? "");
+        $age = trim($_POST["age"] ?? "");
+        $gender = trim($_POST["gender"] ?? "");
+        $class = trim($_POST["class"] ?? "");
+        $contact = trim($_POST["contact"] ?? "");
+        $email = trim($_POST["email"] ?? "");
+
+        if ($name === "" || $age === "" || $gender === "" || $class === "" || $contact === "" || $email === "") {
         $message = "Please fill in all required fields.";
         $messageType = "error";
-    } elseif (strlen($name) < 2 || strlen($name) > 100) {
+        } elseif (strlen($name) < 2 || strlen($name) > 100) {
         $message = "Name must be between 2 and 100 characters.";
         $messageType = "error";
-    } elseif (!filter_var($age, FILTER_VALIDATE_INT)) {
+        } elseif (!filter_var($age, FILTER_VALIDATE_INT)) {
         $message = "Age must be a valid number.";
         $messageType = "error";
-    } elseif ((int)$age < 3 || (int)$age > 100) {
+        } elseif ((int)$age < 3 || (int)$age > 100) {
         $message = "Please enter a valid age between 3 and 100.";
         $messageType = "error";
-    } elseif (!in_array($gender, $genderOptions, true)) {
+        } elseif (!in_array($gender, $genderOptions, true)) {
         $message = "Please choose Male or Female.";
         $messageType = "error";
-    } elseif (!in_array($class, $classOptions, true)) {
+        } elseif (!in_array($class, $classOptions, true)) {
         $message = "Please choose a class from Senior 1 to Senior 6.";
         $messageType = "error";
-    } elseif (strlen($contact) < 7 || strlen($contact) > 30) {
+        } elseif (strlen($contact) < 7 || strlen($contact) > 30) {
         $message = "Please enter a valid contact number.";
         $messageType = "error";
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 150) {
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 150) {
         $message = "Please enter a valid email address.";
         $messageType = "error";
-    } else {
-        try {
-            $update = $pdo->prepare("UPDATE students SET name = :name, age = :age, gender = :gender, class = :class, contact = :contact, email = :email WHERE id = :id");
-            $update->execute([
-                ":name" => $name,
-                ":age" => (int)$age,
-                ":gender" => $gender,
-                ":class" => $class,
-                ":contact" => $contact,
-                ":email" => $email,
-                ":id" => $id
-            ]);
-            header("Location: list.php?updated=1");
-            exit;
-        } catch (PDOException $e) {
-            $message = "Unable to update the student record.";
-            $messageType = "error";
+        } else {
+            try {
+                $update = $pdo->prepare("UPDATE students SET name = :name, age = :age, gender = :gender, class = :class, contact = :contact, email = :email WHERE id = :id");
+                $update->execute([
+                    ":name" => $name,
+                    ":age" => (int)$age,
+                    ":gender" => $gender,
+                    ":class" => $class,
+                    ":contact" => $contact,
+                    ":email" => $email,
+                    ":id" => $id
+                ]);
+                unset($_SESSION["edit_authorized_{$id}"]);
+                header("Location: list.php?updated=1");
+                exit;
+            } catch (PDOException $e) {
+                $message = "Unable to update the student record.";
+                $messageType = "error";
+            }
         }
     }
 }
@@ -123,8 +145,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && $student) {
             </div>
         <?php endif; ?>
 
-        <?php if ($student): ?>
+        <?php if ($student && !$isVerified): ?>
+            <div class="verification-panel">
+                <h3>Verify your identity</h3>
+                <p>Enter the name, contact, and password used during registration before editing this record.</p>
+                <form method="POST" action="edit.php?id=<?= $id ?>">
+                    <input type="hidden" name="action" value="verify">
+                    <div class="form-group">
+                        <label for="verification_name">Registered Name</label>
+                        <input type="text" id="verification_name" name="verification_name" required autocomplete="name">
+                    </div>
+                    <div class="form-group">
+                        <label for="verification_contact">Registered Contact</label>
+                        <input type="tel" id="verification_contact" name="verification_contact" required autocomplete="tel">
+                    </div>
+                    <div class="form-group">
+                        <label for="verification_password">Registration Password</label>
+                        <input type="password" id="verification_password" name="verification_password" required autocomplete="current-password">
+                    </div>
+                    <button type="submit">Verify and Continue <span aria-hidden="true">&rarr;</span></button>
+                </form>
+            </div>
+        <?php elseif ($student): ?>
             <form method="POST" action="edit.php?id=<?= $id ?>">
+                <input type="hidden" name="action" value="update">
                 <div class="form-group">
                     <label for="name">Student Name</label>
                     <input type="text" id="name" name="name" maxlength="100" required value="<?= htmlspecialchars($name) ?>" placeholder="Enter student name">
