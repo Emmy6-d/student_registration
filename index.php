@@ -1,202 +1,85 @@
-<?php
-
-require_once "config.php";
-
-$message = "";
-$messageType = "";
-
-$name = "";
-$age = "";
-$class = "";
-
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-
-    $name = trim($_POST["name"] ?? "");
-    $age = trim($_POST["age"] ?? "");
-    $class = trim($_POST["class"] ?? "");
-
-    if ($name === "" || $age === "" || $class === "") {
-
-        $message = "Please fill in all required fields.";
-        $messageType = "error";
-
-    } elseif (strlen($name) < 2 || strlen($name) > 100) {
-
-        $message = "Name must be between 2 and 100 characters.";
-        $messageType = "error";
-
-    } elseif (!filter_var($age, FILTER_VALIDATE_INT)) {
-
-        $message = "Age must be a valid number.";
-        $messageType = "error";
-
-    } elseif ((int)$age < 3 || (int)$age > 100) {
-
-        $message = "Please enter a valid age between 3 and 100.";
-        $messageType = "error";
-
-    } elseif (strlen($class) < 1 || strlen($class) > 50) {
-
-        $message = "Please enter a valid class.";
-        $messageType = "error";
-
-    } else {
-
-        try {
-
-            $sql = "INSERT INTO students (name, age, class)
-                    VALUES (:name, :age, :class)";
-
-            $stmt = $pdo->prepare($sql);
-
-            $stmt->execute([
-                ":name" => $name,
-                ":age" => (int)$age,
-                ":class" => $class
-            ]);
-
-            $message = "Student registered successfully.";
-            $messageType = "success";
-
-            $name = "";
-            $age = "";
-            $class = "";
-
-        } catch (PDOException $e) {
-
-            $message = "Unable to register the student.";
-            $messageType = "error";
-        }
-    }
-}
-
-?>
-
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>Student Registration</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bluebridge Student Hub</title>
     <link rel="stylesheet" href="style.css">
-
 </head>
-
 <body>
-
 <div class="container">
-
     <header class="header">
-
-        <h1>Student Registration System</h1>
-
+        <h1>Bluebridge Student Hub</h1>
         <nav>
-
-            <a href="index.php" class="active">
-                Register Student
-            </a>
-
-            <a href="list.php">
-                View Students
-            </a>
-
+            <a href="index.php" class="active">Home</a>
+            <a href="register.php">Register Student</a>
+            <a href="list.php">View Students</a>
         </nav>
-
     </header>
 
-
-    <main class="card">
-
-        <h2>Register a Student</h2>
-
-        <?php if ($message !== ""): ?>
-
-            <div class="message <?= htmlspecialchars($messageType) ?>">
-
-                <?= htmlspecialchars($message) ?>
-
+    <main class="home-page">
+        <section class="hero">
+            <div class="hero-copy">
+                <div class="eyebrow">CAMPUS OVERVIEW</div>
+                <h2>Smart student management for every classroom.</h2>
+                <p>
+                    Organize student registrations, track class records, and keep your school data
+                    accessible from a single, welcoming dashboard.
+                </p>
+                <div class="hero-actions">
+                    <a class="button" href="register.php">Register a Student</a>
+                    <a class="button secondary" href="list.php">View Student List</a>
+                </div>
             </div>
 
-        <?php endif; ?>
-
-
-        <form method="POST" action="index.php">
-
-            <div class="form-group">
-
-                <label for="name">
-                    Student Name
-                </label>
-
-                <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    maxlength="100"
-                    required
-                    value="<?= htmlspecialchars($name) ?>"
-                    placeholder="Enter student name"
-                >
-
+            <div class="hero-art" aria-label="Student management overview">
+                <div class="mini-card mini-card-top">
+                    <span>Active students</span>
+                    <strong>1,240</strong>
+                </div>
+                <div class="mini-card mini-card-bottom">
+                    <span>Classes</span>
+                    <strong>18</strong>
+                </div>
+                <div class="paper-stack">
+                    <span>Ready for admission</span>
+                </div>
             </div>
+        </section>
 
-
-            <div class="form-group">
-
-                <label for="age">
-                    Age
-                </label>
-
-                <input
-                    type="number"
-                    id="age"
-                    name="age"
-                    min="3"
-                    max="100"
-                    required
-                    value="<?= htmlspecialchars($age) ?>"
-                    placeholder="Enter age"
-                >
-
+        <section class="stats" aria-label="Key student statistics">
+            <div class="stat-card">
+                <strong>350</strong>
+                <span>new applications</span>
             </div>
-
-
-            <div class="form-group">
-
-                <label for="class">
-                    Class
-                </label>
-
-                <input
-                    type="text"
-                    id="class"
-                    name="class"
-                    maxlength="50"
-                    required
-                    value="<?= htmlspecialchars($class) ?>"
-                    placeholder="Example: Senior 4"
-                >
-
+            <div class="stat-card">
+                <strong>92%</strong>
+                <span>attendance rate</span>
             </div>
+            <div class="stat-card">
+                <strong>24/7</strong>
+                <span>records access</span>
+            </div>
+        </section>
 
-
-            <button type="submit">
-                Register Student
-            </button>
-
-        </form>
-
+        <section class="feature-grid" aria-label="Platform features">
+            <article class="feature-item">
+                <div class="feature-icon">01</div>
+                <h3>Quick Registration</h3>
+                <p>Capture student details in seconds and add them to the school directory.</p>
+            </article>
+            <article class="feature-item">
+                <div class="feature-icon">02</div>
+                <h3>Simple Search</h3>
+                <p>Find students by name or class and manage records without unnecessary steps.</p>
+            </article>
+            <article class="feature-item">
+                <div class="feature-icon">03</div>
+                <h3>Reliable Records</h3>
+                <p>Keep your student database organized with clear, timestamped entries.</p>
+            </article>
+        </section>
     </main>
-
 </div>
-
 </body>
-
 </html>

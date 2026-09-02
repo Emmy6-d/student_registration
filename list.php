@@ -79,11 +79,15 @@ try {
 
     <header class="header">
 
-        <h1>Student Registration System</h1>
+        <h1>Bluebridge Student Hub</h1>
 
         <nav>
 
             <a href="index.php">
+                Home
+            </a>
+
+            <a href="register.php">
                 Register Student
             </a>
 
