@@ -9,6 +9,8 @@ $name = "";
 $age = "";
 $gender = "";
 $class = "";
+$contact = "";
+$email = "";
 $classOptions = ["Senior 1", "Senior 2", "Senior 3", "Senior 4", "Senior 5", "Senior 6"];
 $genderOptions = ["Male", "Female"];
 
@@ -18,8 +20,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $age = trim($_POST["age"] ?? "");
     $gender = trim($_POST["gender"] ?? "");
     $class = trim($_POST["class"] ?? "");
+    $contact = trim($_POST["contact"] ?? "");
+    $email = trim($_POST["email"] ?? "");
 
-    if ($name === "" || $age === "" || $gender === "" || $class === "") {
+    if ($name === "" || $age === "" || $gender === "" || $class === "" || $contact === "" || $email === "") {
         $message = "Please fill in all required fields.";
         $messageType = "error";
     } elseif (strlen($name) < 2 || strlen($name) > 100) {
@@ -37,16 +41,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } elseif (!in_array($class, $classOptions, true)) {
         $message = "Please choose a class from Senior 1 to Senior 6.";
         $messageType = "error";
+    } elseif (strlen($contact) < 7 || strlen($contact) > 30) {
+        $message = "Please enter a valid contact number.";
+        $messageType = "error";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 150) {
+        $message = "Please enter a valid email address.";
+        $messageType = "error";
     } else {
         try {
-            $sql = "INSERT INTO students (name, age, gender, class)
-                    VALUES (:name, :age, :gender, :class)";
+            $sql = "INSERT INTO students (name, age, gender, class, contact, email)
+                    VALUES (:name, :age, :gender, :class, :contact, :email)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 ":name" => $name,
                 ":age" => (int)$age,
                 ":gender" => $gender,
-                ":class" => $class
+                ":class" => $class,
+                ":contact" => $contact,
+                ":email" => $email
             ]);
             $message = "Student registered successfully.";
             $messageType = "success";
@@ -54,6 +66,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $age = "";
             $gender = "";
             $class = "";
+            $contact = "";
+            $email = "";
         } catch (PDOException $e) {
             $message = "Unable to register the student.";
             $messageType = "error";
@@ -112,6 +126,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         </option>
                     <?php endforeach; ?>
                 </select>
+            </div>
+            <div class="form-group">
+                <label for="contact">Contact</label>
+                <input type="tel" id="contact" name="contact" maxlength="30" required value="<?= htmlspecialchars($contact) ?>" placeholder="Enter contact number">
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" maxlength="150" required value="<?= htmlspecialchars($email) ?>" placeholder="Enter email address">
             </div>
             <div class="form-group">
                 <label for="class">Class</label>

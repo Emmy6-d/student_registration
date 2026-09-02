@@ -4,10 +4,11 @@ require_once "config.php";
 
 $search = trim($_GET["search"] ?? "");
 $classFilter = trim($_GET["class"] ?? "");
+$updated = isset($_GET["updated"]);
 
 try {
 
-    $sql = "SELECT id, name, age, gender, class, created_at
+    $sql = "SELECT id, name, age, gender, class, contact, email, created_at
             FROM students
             WHERE 1=1";
 
@@ -122,6 +123,10 @@ try {
 
         <?php endif; ?>
 
+        <?php if ($updated): ?>
+            <div class="message success">Student data updated successfully.</div>
+        <?php endif; ?>
+
 
         <form method="GET"
               action="list.php"
@@ -208,9 +213,15 @@ try {
 
                         <th>Gender</th>
 
+                        <th>Contact</th>
+
+                        <th>Email</th>
+
                         <th>Class</th>
 
                         <th>Registered</th>
+
+                        <th>Action</th>
 
                     </tr>
 
@@ -240,11 +251,23 @@ try {
                             </td>
 
                             <td>
+                                <?= htmlspecialchars($student["contact"] ?? "Not provided") ?>
+                            </td>
+
+                            <td>
+                                <?= htmlspecialchars($student["email"] ?? "Not provided") ?>
+                            </td>
+
+                            <td>
                                 <?= htmlspecialchars($student["class"]) ?>
                             </td>
 
                             <td>
                                 <?= htmlspecialchars($student["created_at"]) ?>
+                            </td>
+
+                            <td>
+                                <a href="edit.php?id=<?= (int)$student["id"] ?>" class="inline-link">Edit</a>
                             </td>
 
                         </tr>

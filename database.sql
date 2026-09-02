@@ -10,8 +10,14 @@ CREATE TABLE IF NOT EXISTS students (
     age TINYINT UNSIGNED NOT NULL,
     gender ENUM('Male', 'Female') NULL,
     class VARCHAR(50) NOT NULL,
+    contact VARCHAR(30) NULL,
+    email VARCHAR(150) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 ALTER TABLE students
     ADD COLUMN IF NOT EXISTS gender ENUM('Male', 'Female') NULL AFTER age;
+
+ALTER TABLE students
+    ADD COLUMN IF NOT EXISTS contact VARCHAR(30) NULL AFTER class,
+    ADD COLUMN IF NOT EXISTS email VARCHAR(150) NULL AFTER contact;
