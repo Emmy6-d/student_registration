@@ -11,6 +11,8 @@ $gender = "";
 $class = "";
 $contact = "";
 $email = "";
+$password = "";
+$passwordConfirmation = "";
 $classOptions = ["Senior 1", "Senior 2", "Senior 3", "Senior 4", "Senior 5", "Senior 6"];
 $genderOptions = ["Male", "Female"];
 
@@ -22,8 +24,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $class = trim($_POST["class"] ?? "");
     $contact = trim($_POST["contact"] ?? "");
     $email = trim($_POST["email"] ?? "");
+    $password = $_POST["password"] ?? "";
+    $passwordConfirmation = $_POST["password_confirmation"] ?? "";
 
-    if ($name === "" || $age === "" || $gender === "" || $class === "" || $contact === "" || $email === "") {
+    if ($name === "" || $age === "" || $gender === "" || $class === "" || $contact === "" || $email === "" || $password === "" || $passwordConfirmation === "") {
         $message = "Please fill in all required fields.";
         $messageType = "error";
     } elseif (strlen($name) < 2 || strlen($name) > 100) {
@@ -47,10 +51,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 150) {
         $message = "Please enter a valid email address.";
         $messageType = "error";
+    } elseif (strlen($password) < 8) {
+        $message = "Password must be at least 8 characters long.";
+        $messageType = "error";
+    } elseif ($password !== $passwordConfirmation) {
+        $message = "Passwords do not match.";
+        $messageType = "error";
     } else {
         try {
-            $sql = "INSERT INTO students (name, age, gender, class, contact, email)
-                    VALUES (:name, :age, :gender, :class, :contact, :email)";
+            $sql = "INSERT INTO students (name, age, gender, class, contact, email, password_hash)
+                    VALUES (:name, :age, :gender, :class, :contact, :email, :password_hash)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 ":name" => $name,
@@ -58,7 +68,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 ":gender" => $gender,
                 ":class" => $class,
                 ":contact" => $contact,
-                ":email" => $email
+                ":email" => $email,
+                ":password_hash" => password_hash($password, PASSWORD_DEFAULT)
             ]);
             $message = "Student registered successfully.";
             $messageType = "success";
@@ -68,6 +79,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $class = "";
             $contact = "";
             $email = "";
+            $password = "";
+            $passwordConfirmation = "";
         } catch (PDOException $e) {
             $message = "Unable to register the student.";
             $messageType = "error";
@@ -134,6 +147,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" maxlength="150" required value="<?= htmlspecialchars($email) ?>" placeholder="Enter email address">
+            </div>
+            <div class="form-group">
+                <label for="password">Create Password</label>
+                <input type="password" id="password" name="password" minlength="8" required placeholder="At least 8 characters">
+            </div>
+            <div class="form-group">
+                <label for="password_confirmation">Confirm Password</label>
+                <input type="password" id="password_confirmation" name="password_confirmation" minlength="8" required placeholder="Re-enter password">
             </div>
             <div class="form-group">
                 <label for="class">Class</label>

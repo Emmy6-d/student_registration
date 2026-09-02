@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS students (
     class VARCHAR(50) NOT NULL,
     contact VARCHAR(30) NULL,
     email VARCHAR(150) NULL,
+    password_hash VARCHAR(255) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -21,3 +22,6 @@ ALTER TABLE students
 ALTER TABLE students
     ADD COLUMN IF NOT EXISTS contact VARCHAR(30) NULL AFTER class,
     ADD COLUMN IF NOT EXISTS email VARCHAR(150) NULL AFTER contact;
+
+ALTER TABLE students
+    ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255) NULL AFTER email;
