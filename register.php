@@ -7,15 +7,19 @@ $messageType = "";
 
 $name = "";
 $age = "";
+$gender = "";
 $class = "";
+$classOptions = ["Senior 1", "Senior 2", "Senior 3", "Senior 4", "Senior 5", "Senior 6"];
+$genderOptions = ["Male", "Female"];
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $name = trim($_POST["name"] ?? "");
     $age = trim($_POST["age"] ?? "");
+    $gender = trim($_POST["gender"] ?? "");
     $class = trim($_POST["class"] ?? "");
 
-    if ($name === "" || $age === "" || $class === "") {
+    if ($name === "" || $age === "" || $gender === "" || $class === "") {
         $message = "Please fill in all required fields.";
         $messageType = "error";
     } elseif (strlen($name) < 2 || strlen($name) > 100) {
@@ -27,23 +31,28 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } elseif ((int)$age < 3 || (int)$age > 100) {
         $message = "Please enter a valid age between 3 and 100.";
         $messageType = "error";
-    } elseif (strlen($class) < 1 || strlen($class) > 50) {
-        $message = "Please enter a valid class.";
+    } elseif (!in_array($gender, $genderOptions, true)) {
+        $message = "Please choose Male or Female.";
+        $messageType = "error";
+    } elseif (!in_array($class, $classOptions, true)) {
+        $message = "Please choose a class from Senior 1 to Senior 6.";
         $messageType = "error";
     } else {
         try {
-            $sql = "INSERT INTO students (name, age, class)
-                    VALUES (:name, :age, :class)";
+            $sql = "INSERT INTO students (name, age, gender, class)
+                    VALUES (:name, :age, :gender, :class)";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 ":name" => $name,
                 ":age" => (int)$age,
+                ":gender" => $gender,
                 ":class" => $class
             ]);
             $message = "Student registered successfully.";
             $messageType = "success";
             $name = "";
             $age = "";
+            $gender = "";
             $class = "";
         } catch (PDOException $e) {
             $message = "Unable to register the student.";
@@ -94,8 +103,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <input type="number" id="age" name="age" min="3" max="100" required value="<?= htmlspecialchars($age) ?>" placeholder="Enter age">
             </div>
             <div class="form-group">
+                <label for="gender">Gender</label>
+                <select id="gender" name="gender" required>
+                    <option value="">Choose gender</option>
+                    <?php foreach ($genderOptions as $genderOption): ?>
+                        <option value="<?= htmlspecialchars($genderOption) ?>" <?= $gender === $genderOption ? "selected" : "" ?>>
+                            <?= htmlspecialchars($genderOption) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-group">
                 <label for="class">Class</label>
-                <input type="text" id="class" name="class" maxlength="50" required value="<?= htmlspecialchars($class) ?>" placeholder="Example: Senior 4">
+                <select id="class" name="class" required>
+                    <option value="">Choose class</option>
+                    <?php foreach ($classOptions as $classOption): ?>
+                        <option value="<?= htmlspecialchars($classOption) ?>" <?= $class === $classOption ? "selected" : "" ?>>
+                            <?= htmlspecialchars($classOption) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
             </div>
             <button type="submit">Register Student <span aria-hidden="true">&rarr;</span></button>
         </form>

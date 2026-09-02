@@ -7,7 +7,7 @@ $classFilter = trim($_GET["class"] ?? "");
 
 try {
 
-    $sql = "SELECT id, name, age, class, created_at
+    $sql = "SELECT id, name, age, gender, class, created_at
             FROM students
             WHERE 1=1";
 
@@ -206,6 +206,8 @@ try {
 
                         <th>Age</th>
 
+                        <th>Gender</th>
+
                         <th>Class</th>
 
                         <th>Registered</th>
@@ -231,6 +233,10 @@ try {
 
                             <td>
                                 <?= htmlspecialchars($student["age"]) ?>
+                            </td>
+
+                            <td>
+                                <?= htmlspecialchars($student["gender"] ?? "Not provided") ?>
                             </td>
 
                             <td>
