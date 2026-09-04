@@ -629,6 +629,33 @@ button:hover,
     font-size: 0.92rem;
 }
 
+.support-contact {
+    display: inline-block;
+    color: #b9d0ee;
+    font-weight: 700;
+    text-decoration: none;
+    animation: support-float 3.8s ease-in-out infinite;
+}
+
+.support-contact strong {
+    font-size: 1.05rem;
+    letter-spacing: 0.04em;
+}
+
+.support-contact:hover,
+.support-contact:focus-visible {
+    text-decoration: underline;
+}
+
+@keyframes support-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .support-contact { animation: none; }
+}
+
 .footer-links {
     display: flex;
     gap: 16px;

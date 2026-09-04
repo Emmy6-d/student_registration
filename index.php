@@ -178,6 +178,9 @@ $isSignedIn = !empty($_SESSION["student_record_id"]);
         <footer class="site-footer">
             <p>Bluebridge Student Hub</p>
             <span>Learning, growth, and a connected campus.</span>
+            <a class="support-contact" href="tel:0789711424">
+                Support and more information: <strong>0789711424</strong>
+            </a>
             <div class="footer-links">
                 <a href="register.php">Register</a>
                 <a href="list.php">Students</a>
