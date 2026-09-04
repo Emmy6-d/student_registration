@@ -13,6 +13,7 @@ $contact = "";
 $email = "";
 $password = "";
 $passwordConfirmation = "";
+$registeredStudentId = "";
 $classOptions = ["Senior 1", "Senior 2", "Senior 3", "Senior 4", "Senior 5", "Senior 6"];
 $genderOptions = ["Male", "Female"];
 
@@ -66,10 +67,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $message = "An account with that email already exists. Please sign in instead.";
                 $messageType = "error";
             } else {
-                $sql = "INSERT INTO students (name, age, gender, class, contact, email, password_hash)
-                        VALUES (:name, :age, :gender, :class, :contact, :email, :password_hash)";
+                $yearPrefix = date("Y");
+                $sequenceStmt = $pdo->prepare(
+                    "SELECT MAX(CAST(SUBSTRING(student_id, 5, 4) AS UNSIGNED)) AS last_sequence
+                     FROM students
+                     WHERE student_id LIKE :year_prefix"
+                );
+                $sequenceStmt->execute([":year_prefix" => $yearPrefix . "%"]);
+                $lastSequence = (int)($sequenceStmt->fetch()["last_sequence"] ?? 0);
+                $nextSequence = $lastSequence + 1;
+
+                if ($nextSequence > 9999) {
+                    throw new RuntimeException("The yearly student ID sequence is full.");
+                }
+
+                $registeredStudentId = $yearPrefix . str_pad((string)$nextSequence, 4, "0", STR_PAD_LEFT);
+                $sql = "INSERT INTO students (student_id, name, age, gender, class, contact, email, password_hash)
+                        VALUES (:student_id, :name, :age, :gender, :class, :contact, :email, :password_hash)";
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([
+                    ":student_id" => $registeredStudentId,
                     ":name" => $name,
                     ":age" => (int)$age,
                     ":gender" => $gender,
@@ -78,7 +95,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     ":email" => $email,
                     ":password_hash" => password_hash($password, PASSWORD_DEFAULT)
                 ]);
-                $message = "Student registered successfully. You can now sign in to view your account.";
+                $message = "Student registered successfully. Your student ID is " . $registeredStudentId . ". Use it with your password to sign in.";
                 $messageType = "success";
                 $name = "";
                 $age = "";
@@ -89,8 +106,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $password = "";
                 $passwordConfirmation = "";
             }
-        } catch (PDOException $e) {
-            $message = "Unable to register the student.";
+        } catch (Throwable $e) {
+            $message = $e instanceof RuntimeException
+                ? $e->getMessage()
+                : "Unable to register the student.";
             $messageType = "error";
         }
     }

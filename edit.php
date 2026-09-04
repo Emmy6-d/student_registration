@@ -1,14 +1,15 @@
 <?php
 
-session_start();
 require_once "config.php";
+require_once "auth.php";
 
-$id = filter_input(INPUT_GET, "id", FILTER_VALIDATE_INT);
+require_login();
+$id = current_student_record_id();
 $message = "";
 $messageType = "";
 $classOptions = ["Senior 1", "Senior 2", "Senior 3", "Senior 4", "Senior 5", "Senior 6"];
 $genderOptions = ["Male", "Female"];
-$isVerified = $_SESSION["edit_authorized_{$id}"] ?? false;
+$isVerified = true;
 
 if (!$id) {
     header("Location: list.php");
@@ -49,7 +50,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && $student) {
             && !empty($student["password_hash"])
             && password_verify($verificationPassword, $student["password_hash"])
         ) {
-            $_SESSION["edit_authorized_{$id}"] = true;
             $isVerified = true;
         } else {
             $message = "The name, contact, or password does not match our records.";
@@ -99,8 +99,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && $student) {
                     ":email" => $email,
                     ":id" => $id
                 ]);
-                unset($_SESSION["edit_authorized_{$id}"]);
-                header("Location: list.php?updated=1");
+                header("Location: account.php");
                 exit;
             } catch (PDOException $e) {
                 $message = "Unable to update the student record.";
@@ -137,7 +136,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && $student) {
     <main class="card form-card">
         <div class="eyebrow">UPDATE STUDENT PROFILE</div>
         <h2>Complete Student Data</h2>
-        <p class="intro">Update all information for <?= htmlspecialchars($student["name"] ?? "this student") ?>.</p>
+        <p class="intro">Update your registration information for <?= htmlspecialchars($student["name"] ?? "this student") ?>.</p>
 
         <?php if ($message !== ""): ?>
             <div class="message <?= htmlspecialchars($messageType) ?>">
@@ -149,7 +148,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && $student) {
             <div class="verification-panel">
                 <h3>Verify your identity</h3>
                 <p>Enter the name, contact, and password used during registration before editing this record.</p>
-                <form method="POST" action="edit.php?id=<?= $id ?>">
+                <form method="POST" action="edit.php">
                     <input type="hidden" name="action" value="verify">
                     <div class="form-group">
                         <label for="verification_name">Registered Name</label>
@@ -167,7 +166,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && $student) {
                 </form>
             </div>
         <?php elseif ($student): ?>
-            <form method="POST" action="edit.php?id=<?= $id ?>">
+            <form method="POST" action="edit.php">
                 <input type="hidden" name="action" value="update">
                 <div class="form-group">
                     <label for="name">Student Name</label>

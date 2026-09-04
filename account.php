@@ -4,11 +4,11 @@ require_once "config.php";
 require_once "auth.php";
 
 require_login();
-$studentId = current_student_id();
+$studentRecordId = current_student_record_id();
 
 try {
-    $stmt = $pdo->prepare("SELECT name, age, gender, class, contact, email, created_at FROM students WHERE id = :id");
-    $stmt->execute([":id" => $studentId]);
+    $stmt = $pdo->prepare("SELECT student_id, name, age, gender, class, contact, email, created_at FROM students WHERE id = :id");
+    $stmt->execute([":id" => $studentRecordId]);
     $student = $stmt->fetch();
 
     if (!$student) {
@@ -51,6 +51,7 @@ try {
         <?php elseif ($student): ?>
             <p class="intro">Your complete registration information is available only after signing in.</p>
             <dl class="account-details">
+                <div><dt>Student ID</dt><dd><?= htmlspecialchars($student["student_id"]) ?></dd></div>
                 <div><dt>Name</dt><dd><?= htmlspecialchars($student["name"]) ?></dd></div>
                 <div><dt>Age</dt><dd><?= htmlspecialchars($student["age"]) ?></dd></div>
                 <div><dt>Gender</dt><dd><?= htmlspecialchars($student["gender"] ?? "Not provided") ?></dd></div>
@@ -59,6 +60,7 @@ try {
                 <div><dt>Email</dt><dd><?= htmlspecialchars($student["email"] ?? "Not provided") ?></dd></div>
                 <div><dt>Registered</dt><dd><?= htmlspecialchars($student["created_at"]) ?></dd></div>
             </dl>
+            <p style="margin-top: 24px;"><a href="edit.php" class="button">Edit My Information <span aria-hidden="true">&rarr;</span></a></p>
         <?php endif; ?>
     </main>
 </div>

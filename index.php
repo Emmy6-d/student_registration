@@ -2,7 +2,7 @@
 
 require_once "auth.php";
 start_session();
-$isSignedIn = !empty($_SESSION["student_id"]);
+$isSignedIn = !empty($_SESSION["student_record_id"]);
 
 ?>
 <!DOCTYPE html>

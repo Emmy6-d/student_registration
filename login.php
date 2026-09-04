@@ -5,34 +5,34 @@ require_once "auth.php";
 
 start_session();
 
-if (!empty($_SESSION["student_id"])) {
+if (!empty($_SESSION["student_record_id"])) {
     header("Location: account.php");
     exit;
 }
 
 $message = "";
-$email = "";
+$studentId = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $email = trim($_POST["email"] ?? "");
+    $studentId = trim($_POST["student_id"] ?? "");
     $password = $_POST["password"] ?? "";
 
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $password === "") {
-        $message = "Enter the email and password used during registration.";
+    if (!preg_match("/^\d{8}$/", $studentId) || $password === "") {
+        $message = "Enter your 8-digit student ID and password.";
     } else {
         try {
-            $stmt = $pdo->prepare("SELECT id, password_hash FROM students WHERE email = :email LIMIT 1");
-            $stmt->execute([":email" => $email]);
+            $stmt = $pdo->prepare("SELECT id, password_hash FROM students WHERE student_id = :student_id LIMIT 1");
+            $stmt->execute([":student_id" => $studentId]);
             $student = $stmt->fetch();
 
             if ($student && !empty($student["password_hash"]) && password_verify($password, $student["password_hash"])) {
                 session_regenerate_id(true);
-                $_SESSION["student_id"] = (int)$student["id"];
+                $_SESSION["student_record_id"] = (int)$student["id"];
                 header("Location: account.php");
                 exit;
             }
 
-            $message = "The email or password is incorrect.";
+            $message = "The student ID or password is incorrect.";
         } catch (PDOException $e) {
             $message = "Unable to sign in right now.";
         }
@@ -63,14 +63,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <main class="card form-card narrow-card">
         <div class="eyebrow">STUDENT ACCOUNT</div>
         <h2>Sign in to your account</h2>
-        <p class="intro">Use the email and password you created during registration to view your complete information.</p>
+        <p class="intro">Use the student ID and password shown after registration to view and edit your complete information.</p>
         <?php if ($message !== ""): ?>
             <div class="message error"><?= htmlspecialchars($message) ?></div>
         <?php endif; ?>
         <form method="POST" action="login.php">
             <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required value="<?= htmlspecialchars($email) ?>" autocomplete="email">
+                <label for="student_id">Student ID</label>
+                <input type="text" id="student_id" name="student_id" inputmode="numeric" pattern="[0-9]{8}" maxlength="8" required value="<?= htmlspecialchars($studentId) ?>" autocomplete="username">
             </div>
             <div class="form-group">
                 <label for="password">Password</label>

@@ -6,6 +6,7 @@ USE student_registration;
 
 CREATE TABLE IF NOT EXISTS students (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    student_id CHAR(8) NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
     age TINYINT UNSIGNED NOT NULL,
     gender ENUM('Male', 'Female') NULL,
@@ -18,6 +19,9 @@ CREATE TABLE IF NOT EXISTS students (
 
 ALTER TABLE students
     ADD COLUMN IF NOT EXISTS gender ENUM('Male', 'Female') NULL AFTER age;
+
+ALTER TABLE students
+    ADD COLUMN IF NOT EXISTS student_id CHAR(8) NULL UNIQUE AFTER id;
 
 ALTER TABLE students
     ADD COLUMN IF NOT EXISTS contact VARCHAR(30) NULL AFTER class,

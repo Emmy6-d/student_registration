@@ -23,6 +23,11 @@ try {
         PDO::FETCH_ASSOC
     );
 
+    $pdo->exec(
+        "ALTER TABLE students
+         ADD COLUMN IF NOT EXISTS student_id CHAR(8) NULL UNIQUE AFTER id"
+    );
+
 } catch (PDOException $e) {
 
     die("Database connection failed.");
