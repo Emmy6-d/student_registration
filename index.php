@@ -1,3 +1,10 @@
+<?php
+
+require_once "auth.php";
+start_session();
+$isSignedIn = !empty($_SESSION["student_id"]);
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,6 +25,12 @@
             <a href="register.php">Register Student</a>
             <a href="list.php">View Students</a>
             <a href="options.php">Options</a>
+            <?php if ($isSignedIn): ?>
+                <a href="account.php">My Account</a>
+                <a href="logout.php">Sign Out</a>
+            <?php else: ?>
+                <a href="login.php">Sign In</a>
+            <?php endif; ?>
         </nav>
     </header>
 

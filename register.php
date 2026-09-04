@@ -59,28 +59,36 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $messageType = "error";
     } else {
         try {
-            $sql = "INSERT INTO students (name, age, gender, class, contact, email, password_hash)
-                    VALUES (:name, :age, :gender, :class, :contact, :email, :password_hash)";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([
-                ":name" => $name,
-                ":age" => (int)$age,
-                ":gender" => $gender,
-                ":class" => $class,
-                ":contact" => $contact,
-                ":email" => $email,
-                ":password_hash" => password_hash($password, PASSWORD_DEFAULT)
-            ]);
-            $message = "Student registered successfully.";
-            $messageType = "success";
-            $name = "";
-            $age = "";
-            $gender = "";
-            $class = "";
-            $contact = "";
-            $email = "";
-            $password = "";
-            $passwordConfirmation = "";
+            $existing = $pdo->prepare("SELECT id FROM students WHERE email = :email LIMIT 1");
+            $existing->execute([":email" => $email]);
+
+            if ($existing->fetch()) {
+                $message = "An account with that email already exists. Please sign in instead.";
+                $messageType = "error";
+            } else {
+                $sql = "INSERT INTO students (name, age, gender, class, contact, email, password_hash)
+                        VALUES (:name, :age, :gender, :class, :contact, :email, :password_hash)";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
+                    ":name" => $name,
+                    ":age" => (int)$age,
+                    ":gender" => $gender,
+                    ":class" => $class,
+                    ":contact" => $contact,
+                    ":email" => $email,
+                    ":password_hash" => password_hash($password, PASSWORD_DEFAULT)
+                ]);
+                $message = "Student registered successfully. You can now sign in to view your account.";
+                $messageType = "success";
+                $name = "";
+                $age = "";
+                $gender = "";
+                $class = "";
+                $contact = "";
+                $email = "";
+                $password = "";
+                $passwordConfirmation = "";
+            }
         } catch (PDOException $e) {
             $message = "Unable to register the student.";
             $messageType = "error";
@@ -109,6 +117,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <a href="register.php" class="active">Register Student</a>
             <a href="list.php">View Students</a>
             <a href="options.php">Options</a>
+            <a href="login.php">Sign In</a>
         </nav>
     </header>
     <main class="card form-card">

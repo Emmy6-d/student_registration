@@ -8,7 +8,7 @@ $updated = isset($_GET["updated"]);
 
 try {
 
-    $sql = "SELECT id, name, age, gender, class, contact, email, created_at
+    $sql = "SELECT name, gender, class
             FROM students
             WHERE 1=1";
 
@@ -205,23 +205,11 @@ try {
 
                     <tr>
 
-                        <th>ID</th>
-
                         <th>Name</th>
-
-                        <th>Age</th>
 
                         <th>Gender</th>
 
-                        <th>Contact</th>
-
-                        <th>Email</th>
-
                         <th>Class</th>
-
-                        <th>Registered</th>
-
-                        <th>Action</th>
 
                     </tr>
 
@@ -235,15 +223,7 @@ try {
                         <tr>
 
                             <td>
-                                <?= htmlspecialchars($student["id"]) ?>
-                            </td>
-
-                            <td>
                                 <?= htmlspecialchars($student["name"]) ?>
-                            </td>
-
-                            <td>
-                                <?= htmlspecialchars($student["age"]) ?>
                             </td>
 
                             <td>
@@ -251,23 +231,7 @@ try {
                             </td>
 
                             <td>
-                                <?= htmlspecialchars($student["contact"] ?? "Not provided") ?>
-                            </td>
-
-                            <td>
-                                <?= htmlspecialchars($student["email"] ?? "Not provided") ?>
-                            </td>
-
-                            <td>
                                 <?= htmlspecialchars($student["class"]) ?>
-                            </td>
-
-                            <td>
-                                <?= htmlspecialchars($student["created_at"]) ?>
-                            </td>
-
-                            <td>
-                                <a href="edit.php?id=<?= (int)$student["id"] ?>" class="inline-link">Edit</a>
                             </td>
 
                         </tr>
