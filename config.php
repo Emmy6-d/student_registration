@@ -4,7 +4,6 @@ $host = "localhost";
 $dbname = "student_registration";
 $username = "root";
 $password = "";
-$mailFrom = "no-reply@bluebridge.local";
 
 try {
 
