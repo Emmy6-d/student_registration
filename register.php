@@ -95,8 +95,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     ":email" => $email,
                     ":password_hash" => password_hash($password, PASSWORD_DEFAULT)
                 ]);
-                $message = "Student registered successfully. Your student ID is " . $registeredStudentId . ". Use it with your password to sign in.";
-                $messageType = "success";
+
+                $subject = "Bluebridge Student Registration Confirmation";
+                $emailBody = "Hello " . $name . ",\n\n"
+                    . "Your Bluebridge student registration was successful.\n\n"
+                    . "Student ID: " . $registeredStudentId . "\n"
+                    . "Use this student ID and the password you created to sign in.\n\n"
+                    . "Please keep this message safe.\n\n"
+                    . "Regards,\nBluebridge Student Hub";
+                $headers = "From: " . $mailFrom . "\r\n"
+                    . "Reply-To: " . $mailFrom . "\r\n"
+                    . "Content-Type: text/plain; charset=UTF-8\r\n";
+
+                if (mail($email, $subject, $emailBody, $headers)) {
+                    $message = "Student registered successfully. A confirmation email with the student ID has been sent to the address provided.";
+                    $messageType = "success";
+                } else {
+                    $message = "Student registered, but the confirmation email could not be sent. Please contact the school administrator.";
+                    $messageType = "error";
+                }
                 $name = "";
                 $age = "";
                 $gender = "";
